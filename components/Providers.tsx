@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { baseSepolia } from "wagmi/chains";
 import { http, createConfig, WagmiProvider } from "wagmi";
 import { type ReactNode, useState } from "react";
-import { coinbaseWallet } from 'wagmi/connectors';
+import { coinbaseWallet, injected } from 'wagmi/connectors';
 
 const config = createConfig({
     chains: [baseSepolia],
@@ -14,6 +14,7 @@ const config = createConfig({
         [baseSepolia.id]: http(),
     },
     connectors: [
+        injected(),
         coinbaseWallet({
             appName: 'BasketParty',
         })
