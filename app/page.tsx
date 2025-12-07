@@ -52,13 +52,13 @@ export default function Home() {
       fetch(`/api/leaderboard?user=${user.address}`)
         .then(res => res.json())
         .then(json => {
-          if (json.userRank?.score) {
+          if (json.userRank?.score !== undefined) {
             setHighScore(json.userRank.score);
           }
         })
         .catch(console.error);
     }
-  }, [user.address]);
+  }, [user.address, gameState]); // Refetch when returning to menu
 
   // 1. Try to Start Game (Check Free Quota)
   const handleStartRequest = async () => {
@@ -112,7 +112,7 @@ export default function Home() {
       // Optimistic update
       setGameState("gameover");
       try {
-        await fetch("/api/game/end", {
+        const res = await fetch("/api/game/end", {
           method: "POST",
           body: JSON.stringify({
             address: user.address,
@@ -122,7 +122,17 @@ export default function Home() {
             game_id: sessionData.gameId
           }),
         });
-        // Update local high score logic here if needed
+
+        // Update local high score immediately if success
+        if (res.ok) {
+          const data = await res.json();
+          if (data.new_high_score) {
+            setHighScore(score);
+          } else if (score > highScore) {
+            // Fallback if API doesn't return new_high_score correctly but we know it is
+            setHighScore(score);
+          }
+        }
       } catch (e) { console.error(e); }
     } else {
       setGameState("gameover");
@@ -263,10 +273,10 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="bg-slate-950/40 border border-white/5 rounded-xl p-4 text-center group/stat hover:border-white/10 transition-colors">
-                        <div className="text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">Credits</div>
-                        <div className="text-2xl font-black text-white flex items-center justify-center gap-2 group-hover/stat:scale-110 transition-transform">
-                          <Coins className="w-4 h-4 text-blue-400" />
-                          ∞
+                        <div className="text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">Mode</div>
+                        <div className="text-xl font-black text-white flex items-center justify-center gap-2 group-hover/stat:scale-110 transition-transform">
+                          <Coins className="w-4 h-4 text-green-400" />
+                          GRATUIT
                         </div>
                       </div>
                     </div>
