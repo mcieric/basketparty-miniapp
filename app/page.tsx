@@ -126,11 +126,11 @@ export default function Home() {
         // Update local high score immediately if success
         if (res.ok) {
           const data = await res.json();
-          if (data.new_high_score) {
-            setHighScore(score);
-          } else if (score > highScore) {
-            // Fallback if API doesn't return new_high_score correctly but we know it is
-            setHighScore(score);
+          // CUMULATIVE: Update total score
+          if (data.new_total_score) {
+            setHighScore(data.new_total_score);
+          } else if (data.score_added) {
+            setHighScore(prev => prev + score);
           }
         }
       } catch (e) { console.error(e); }

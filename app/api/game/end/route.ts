@@ -16,15 +16,12 @@ export async function POST(req: NextRequest) {
         }
 
         // Save Score to Leaderboard (Sorted Set)
-        // High Score Logic: Check if new score is higher than current
-        const currentScoreStr = await redis.zscore('leaderboard:alltime', address);
-        const currentScore = currentScoreStr ? parseInt(currentScoreStr, 10) : null;
+        // CUMULATIVE Logic: Add score to existing total (zincrby)
+        await redis.zincrby('leaderboard:alltime', score, address);
 
-        let newHighScore = false;
-        if (currentScore === null || score > currentScore) {
-            await redis.zadd('leaderboard:alltime', score, address);
-            newHighScore = true;
-        }
+        // Get new total for response
+        const newTotalStr = await redis.zscore('leaderboard:alltime', address);
+        const newTotal = newTotalStr ? parseInt(newTotalStr, 10) : score;
 
         // Save User Metadata (Hash)
         if (name || avatar) {
@@ -35,11 +32,12 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        console.log(`[SCORE SAVED] User: ${address}, Score: ${score}, GameID: ${game_id}`);
+        console.log(`[SCORE SAVED] User: ${address}, Added: ${score}, New Total: ${newTotal}`);
 
         return NextResponse.json({
             success: true,
-            new_high_score: newHighScore
+            score_added: score,
+            new_total_score: newTotal
         });
 
     } catch (error) {
