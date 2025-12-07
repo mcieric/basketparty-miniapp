@@ -1,0 +1,33 @@
+{
+    "accountAssociation": {
+        "header": "",
+        "payload": "",
+        "signature": ""
+    },
+    "miniapp": {
+        "version": "1",
+        "name": "Basket Party",
+        "homeUrl": "https://basketparty-miniapp.vercel.app",
+        "iconUrl": "https://basketparty-miniapp.vercel.app/icon.png",
+        "splashImageUrl": "https://basketparty-miniapp.vercel.app/splash.png",
+        "splashBackgroundColor": "#0f172a",
+        "webhookUrl": "https://basketparty-miniapp.vercel.app/api/webhook",
+        "subtitle": "Shoot hoops, win glory!",
+        "description": "Compete in the ultimate basketball mini-app on Farcaster. Daily free shots, persistent leaderboard, and verified on-chain.",
+        "screenshotUrls": [
+            "https://basketparty-miniapp.vercel.app/screenshot.png"
+        ],
+        "primaryCategory": "social",
+        "tags": [
+            "game",
+            "sports",
+            "basketball",
+            "miniapp"
+        ],
+        "heroImageUrl": "https://basketparty-miniapp.vercel.app/hero.png",
+        "tagline": "Shoot hoops, win glory!",
+        "ogTitle": "Basket Party",
+        "ogDescription": "Compete in the ultimate basketball mini-app on Farcaster.",
+        "ogImageUrl": "https://basketparty-miniapp.vercel.app/hero.png"
+    }
+}

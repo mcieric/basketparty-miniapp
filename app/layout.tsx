@@ -10,6 +10,15 @@ const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "BasketParty Mini-App",
   description: "Play BasketParty on Farcaster",
+  other: {
+    "fc:frame": JSON.stringify({
+      version: "next",
+      imageUrl: "https://basketparty-miniapp.vercel.app/hero.png",
+      buttonTitle: "Play BasketParty",
+      splashImageUrl: "https://basketparty-miniapp.vercel.app/splash.png",
+      splashBackgroundColor: "#0f172a",
+    })
+  }
 };
 
 export default function RootLayout({
