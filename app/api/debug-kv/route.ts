@@ -1,65 +1,42 @@
-import { kv } from "@vercel/kv";
+import { redis } from "@/lib/redis";
 import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        // 1. Scan available Env Vars (Masked values)
-        const relevantKeys = Object.keys(process.env).filter(key =>
-            key.includes("KV") ||
-            key.includes("REDIS") ||
-            key.includes("STORAGE") ||
-            (key.includes("URL") || key.includes("TOKEN"))
-        );
+        // 1. Check Config
+        const redisUrl = process.env.REDIS_URL;
 
-        const envDebug = relevantKeys.reduce((acc, key) => {
-            const val = process.env[key] || "";
-            acc[key] = val.startsWith("http") ? "Starts with http..." :
-                val.startsWith("redis") ? "Starts with redis..." :
-                    val ? "Present (Masked)" : "Missing";
-            return acc;
-        }, {} as Record<string, string>);
-
-        // Check specifically for expected ones
-        const config = {
-            url: process.env.KV_REST_API_URL || process.env.KV_URL,
-            token: process.env.KV_REST_API_TOKEN || process.env.KV_TOKEN,
-        };
-
-        if (!config.url || !config.token) {
+        if (!redisUrl) {
             return NextResponse.json({
                 status: "CONFIG_ERROR",
-                message: "Standard @vercel/kv vars missing. See 'env_found' for what is available.",
-                env_found: envDebug,
-                note: "If you used a Custom Prefix (e.g. STORAGE), you need to update the connection config."
+                message: "REDIS_URL is missing.",
+                note: "Please Check Vercel Storage settings."
             });
         }
 
         // 2. Test Write
         const timestamp = Date.now();
-        await kv.set("debug:test", timestamp);
+        await redis.set("debug:test", timestamp);
 
         // 3. Test Read
-        const readBack = await kv.get("debug:test");
+        const readBack = await redis.get("debug:test");
 
         // 4. Check Leaderboard
-        const leaderboard = await kv.zrange("leaderboard:alltime", 0, 5, {
-            rev: true,
-            withScores: true,
-        });
+        const leaderboard = await redis.zrevrange("leaderboard:alltime", 0, 5, 'WITHSCORES');
 
         return NextResponse.json({
             status: "OK",
-            write_read_test: readBack === timestamp ? "SUCCESS" : "FAILED",
+            mode: "TCP (ioredis)",
+            write_read_test: String(readBack) == String(timestamp) ? "SUCCESS" : "FAILED",
             leaderboard_preview: leaderboard,
-            env_check: envDebug,
+            url_masked: redisUrl.substring(0, 15) + "..."
         });
     } catch (error) {
         return NextResponse.json({
             status: "EXCEPTION",
             error: String(error),
-            env_check: {
-                KV_REST_API_URL: !!process.env.KV_REST_API_URL,
-                KV_REST_API_TOKEN: !!process.env.KV_REST_API_TOKEN
+            params: {
+                redis_url_present: !!process.env.REDIS_URL
             }
         });
     }
