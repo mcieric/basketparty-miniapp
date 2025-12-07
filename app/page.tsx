@@ -355,14 +355,15 @@ export default function Home() {
                     chainId={8453}
                     calls={[
                       {
-                        to: "0xb7A0266F0E0559957B77443E090F104383cAF16F",
-                        functionName: "play",
+                        to: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Base USDC
+                        functionName: "transfer",
+                        args: ["0x6076a0d96084776526332766148Cc74e6Fae9c5b", BigInt(100000)], // 0.1 USDC (6 decimals)
                         abi: [{
-                          inputs: [],
-                          name: "play",
-                          outputs: [],
-                          stateMutability: "nonpayable",
-                          type: "function"
+                          type: "function",
+                          name: "transfer",
+                          inputs: [{ name: "to", type: "address" }, { name: "value", type: "uint256" }],
+                          outputs: [{ name: "", type: "bool" }],
+                          stateMutability: "nonpayable"
                         }]
                       }
                     ]}
