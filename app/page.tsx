@@ -276,7 +276,7 @@ export default function Home() {
                         <div className="text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">Mode</div>
                         <div className="text-xl font-black text-white flex items-center justify-center gap-2 group-hover/stat:scale-110 transition-transform">
                           <Coins className="w-4 h-4 text-green-400" />
-                          GRATUIT
+                          FREE
                         </div>
                       </div>
                     </div>
@@ -289,8 +289,8 @@ export default function Home() {
                     >
                       <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%] animate-[shimmer_3s_infinite] pointer-events-none" />
                       <span className="relative z-10 flex items-center justify-center gap-2 drop-shadow-md">
-                        JOUER
-                        <span className="text-xs font-bold not-italic bg-black/30 px-2 py-0.5 rounded-full text-blue-200 border border-white/10">Gratuit</span>
+                        PLAY
+                        <span className="text-xs font-bold not-italic bg-black/30 px-2 py-0.5 rounded-full text-blue-200 border border-white/10">Free</span>
                       </span>
                     </Button>
 
@@ -301,7 +301,7 @@ export default function Home() {
                       className="w-full text-slate-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all rounded-xl h-10 text-xs font-bold tracking-wider uppercase"
                     >
                       <Trophy className="w-3 h-3 mr-2" />
-                      Voir le classement
+                      View Leaderboard
                     </Button>
                   </div>
                 </Card>
@@ -323,7 +323,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse" />
               <Loader2 className="w-12 h-12 text-blue-400 animate-spin relative z-10" />
             </div>
-            <p className="text-sm font-mono text-blue-200/50 animate-pulse uppercase tracking-widest">Initialisation...</p>
+            <p className="text-sm font-mono text-blue-200/50 animate-pulse uppercase tracking-widest">Initializing...</p>
           </motion.div>
         )
         }
@@ -344,9 +344,9 @@ export default function Home() {
                   <Coins className="w-10 h-10 text-yellow-500" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white">QUOTA GRATUIT ÉPUISÉ</h2>
+                  <h2 className="text-2xl font-black text-white">DAILY LIMIT REACHED</h2>
                   <p className="text-slate-400 text-sm">
-                    Vous avez déjà joué votre partie gratuite aujourd&apos;hui.
+                    You have already played your free game today.
                   </p>
                 </div>
 
@@ -374,7 +374,7 @@ export default function Home() {
                       }
                     }}
                   >
-                    <TransactionButton text="PAYER 0.1 USDC" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-900/20" />
+                    <TransactionButton text="PAY 0.1 USDC" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-900/20" />
                     <TransactionSponsor />
                     <TransactionStatus>
                       <TransactionStatusLabel />
@@ -387,7 +387,7 @@ export default function Home() {
                     onClick={() => setGameState("menu")}
                     className="w-full hover:bg-white/5 text-slate-400 hover:text-white"
                   >
-                    Annuler
+                    Cancel
                   </Button>
                 </div>
               </Card>
@@ -411,7 +411,7 @@ export default function Home() {
                 className="mt-8 text-white/30 hover:text-white hover:bg-white/5 backdrop-blur-md transition-all uppercase tracking-widest text-xs font-bold"
                 onClick={() => setGameState("menu")}
               >
-                Abandonner
+                Give Up
               </Button>
             </motion.div>
           )
@@ -449,7 +449,7 @@ export default function Home() {
                     onClick={handleStartRequest}
                     className="w-full h-12 font-bold bg-white text-black hover:bg-slate-200 shadow-lg shadow-white/10"
                   >
-                    REJOUER
+                    PLAY AGAIN
                   </Button>
                 </div>
               </Card>

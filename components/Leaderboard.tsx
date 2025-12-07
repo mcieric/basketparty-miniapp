@@ -90,7 +90,7 @@ export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
                                         period === "daily" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
                                     )}
                                 >
-                                    JOURNALIER
+                                    DAILY
                                 </button>
                                 <button
                                     onClick={() => setPeriod("alltime")}
