@@ -3,29 +3,34 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        // 1. Check Env Vars (masked)
-        const varsToCheck = [
-            "KV_REST_API_URL",
-            "KV_REST_API_TOKEN",
-            "KV_URL",
-            "REDIS_URL"
-        ];
+        // 1. Scan available Env Vars (Masked values)
+        const relevantKeys = Object.keys(process.env).filter(key =>
+            key.includes("KV") ||
+            key.includes("REDIS") ||
+            key.includes("STORAGE") ||
+            (key.includes("URL") || key.includes("TOKEN"))
+        );
 
-        const envStatus = varsToCheck.reduce((acc, key) => {
-            acc[key] = !!process.env[key];
+        const envDebug = relevantKeys.reduce((acc, key) => {
+            const val = process.env[key] || "";
+            acc[key] = val.startsWith("http") ? "Starts with http..." :
+                val.startsWith("redis") ? "Starts with redis..." :
+                    val ? "Present (Masked)" : "Missing";
             return acc;
-        }, {} as Record<string, boolean>);
+        }, {} as Record<string, string>);
 
-        const hasUrl = !!process.env.KV_REST_API_URL;
-        const hasToken = !!process.env.KV_REST_API_TOKEN;
+        // Check specifically for expected ones
+        const config = {
+            url: process.env.KV_REST_API_URL || process.env.KV_URL,
+            token: process.env.KV_REST_API_TOKEN || process.env.KV_TOKEN,
+        };
 
-        if (!hasUrl || !hasToken) {
+        if (!config.url || !config.token) {
             return NextResponse.json({
-                status: "ERROR",
-                message: "Missing Required Environment Variables for @vercel/kv",
-                debug: "Did you 'Connect Project' in Vercel Storage?",
-                env_check: envStatus,
-                note: "If you just linked the database, you MUST redeploy the project for it to work."
+                status: "CONFIG_ERROR",
+                message: "Standard @vercel/kv vars missing. See 'env_found' for what is available.",
+                env_found: envDebug,
+                note: "If you used a Custom Prefix (e.g. STORAGE), you need to update the connection config."
             });
         }
 
@@ -46,7 +51,7 @@ export async function GET() {
             status: "OK",
             write_read_test: readBack === timestamp ? "SUCCESS" : "FAILED",
             leaderboard_preview: leaderboard,
-            env_check: envStatus,
+            env_check: envDebug,
         });
     } catch (error) {
         return NextResponse.json({
