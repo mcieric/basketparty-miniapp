@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 
 async function main() {
-    const USDC_ADDRESS_BASE_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // Mock USDC on Sepolia or real one
+    const USDC_ADDRESS_BASE_SEPOLIA = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base Mainnet
     // Check strict address for Base Sepolia USDC or use a mock for dev
 
     const [deployer] = await ethers.getSigners();

@@ -324,7 +324,7 @@ export default function Home() {
 
                 <div className="space-y-3 pt-2">
                   <Transaction
-                    chainId={84532}
+                    chainId={8453}
                     calls={[
                       {
                         to: "0xb7A0266F0E0559957B77443E090F104383cAF16F",
