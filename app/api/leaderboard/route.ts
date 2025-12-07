@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const period = searchParams.get('period') || 'alltime';
-    const isDaily = period === 'daily'; // We might only support 'alltime' initially
+    // const period = searchParams.get('period') || 'alltime';
+    // const isDaily = period === 'daily'; 
 
     // For now, map 'daily' to 'alltime' or implement daily keys if needed later.
     // Let's stick to one 'leaderboard:alltime' for simplicity as requested, 
@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
         const topEntries = await kv.zrange(LEADERBOARD_KEY, 0, 49, { rev: true, withScores: true });
 
         // Hydrate with metadata
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const leaderboard = await Promise.all(topEntries.map(async (entry: any, index: number) => {
             // Entry structure depends on library version/adapter. 
             // If using @vercel/kv directly, it returns objects { member: string, score: number }
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
             const score = entry.score;
 
             // Fetch user metadata
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const metadata: any = await kv.hgetall(`user:${address}`);
 
             return {
@@ -53,6 +55,7 @@ export async function GET(req: NextRequest) {
                 const score = await kv.zscore(LEADERBOARD_KEY, userAddress);
 
                 if (rank !== null && score !== null) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const metadata: any = await kv.hgetall(`user:${userAddress}`);
                     userRank = {
                         rank: rank + 1,
