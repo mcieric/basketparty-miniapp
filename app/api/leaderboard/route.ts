@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const seed = isDaily ? 'daily_seed' : 'alltime_seed';
     const scoreMultiplier = isDaily ? 0.3 : 1; // Daily scores are lower
 
-    let mockLeaderboard = Array.from({ length: 10 }).map((_, i) => {
+    const mockLeaderboard = Array.from({ length: 10 }).map((_, i) => {
         // Deterministic mock addresses based on index
         const mockAddr = `0x${(i + 10).toString(16).repeat(10)}`;
         return {
