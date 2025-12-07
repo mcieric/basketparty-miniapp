@@ -19,15 +19,19 @@ interface LeaderboardProps {
     onOpenChange: (open: boolean) => void;
 }
 
+import { useBaseUserContext } from "@/app/hooks/useBaseUserContext";
+
 export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
     const [data, setData] = useState<LeaderboardEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState<"daily" | "alltime">("daily");
+    const user = useBaseUserContext();
 
     useEffect(() => {
         if (open) {
             setLoading(true);
-            fetch(`/api/leaderboard?period=${period}`)
+            const query = user.address ? `?period=${period}&user=${user.address}` : `?period=${period}`;
+            fetch(`/api/leaderboard${query}`)
                 .then(res => res.json())
                 .then(json => {
                     setData(json.leaderboard);
@@ -38,7 +42,7 @@ export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
                     setLoading(false);
                 });
         }
-    }, [open, period]);
+    }, [open, period, user.address]);
 
     return (
         <AnimatePresence>

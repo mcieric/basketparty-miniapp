@@ -34,6 +34,7 @@ export default function Home() {
   const [gameState, setGameState] = useState<"menu" | "loading" | "playing" | "payment" | "gameover">("menu");
   const [sessionData, setSessionData] = useState<{ gameId?: string, error?: string } | null>(null);
   const [lastScore, setLastScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
@@ -44,6 +45,20 @@ export default function Home() {
     };
     init();
   }, []);
+
+  // Fetch High Score
+  useEffect(() => {
+    if (user.address) {
+      fetch(`/api/leaderboard?user=${user.address}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.userRank?.score) {
+            setHighScore(json.userRank.score);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [user.address]);
 
   // 1. Try to Start Game (Check Free Quota)
   const handleStartRequest = async () => {
@@ -246,7 +261,7 @@ export default function Home() {
                         <div className="text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">High Score</div>
                         <div className="text-2xl font-black text-white flex items-center justify-center gap-2 group-hover/stat:scale-110 transition-transform">
                           <Trophy className="w-4 h-4 text-yellow-500" />
-                          0
+                          {highScore}
                         </div>
                       </div>
                       <div className="bg-slate-950/40 border border-white/5 rounded-xl p-4 text-center group/stat hover:border-white/10 transition-colors">

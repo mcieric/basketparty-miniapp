@@ -4,28 +4,43 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const period = searchParams.get('period') || 'alltime'; // 'daily' or 'alltime'
 
+    const userAddress = searchParams.get('user');
+
     // Generate some mock data
     const isDaily = period === 'daily';
     const seed = isDaily ? 'daily_seed' : 'alltime_seed';
     const scoreMultiplier = isDaily ? 0.3 : 1; // Daily scores are lower
 
-    const mockLeaderboard = Array.from({ length: 10 }).map((_, i) => ({
-        rank: i + 1,
-        address: `0x${Math.random().toString(16).substring(2, 10)}...${Math.random().toString(16).substring(2, 6)}`,
-        name: i % 3 === 0 ? `player${i}.base.eth` : undefined, // Some have names
-        avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}_${i}`,
-        score: Math.floor((Math.random() * (500 - 50) + 50) * (10 - i) * scoreMultiplier), // Descendingish scores
-        isUser: i === 3 // Fake the user being 4th
-    })).sort((a, b) => b.score - a.score).map((Item, index) => ({ ...Item, rank: index + 1 }));
+    let mockLeaderboard = Array.from({ length: 10 }).map((_, i) => {
+        // Deterministic mock addresses based on index
+        const mockAddr = `0x${(i + 10).toString(16).repeat(10)}`;
+        return {
+            rank: i + 1,
+            address: i === 3 && userAddress ? userAddress : mockAddr, // Force 4th place to be user for demo if userAddress exists
+            name: i === 3 && userAddress ? 'YOU' : i === 0 ? 'king.base.eth' : `player${i}.base.eth`,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i === 3 && userAddress ? userAddress : seed + i}`, // Reliable avatar API
+            score: Math.floor((500 - i * 40) * scoreMultiplier), // Descending scores
+            isUser: (i === 3 && !!userAddress) // Mark as user if it matches
+        };
+    });
+
+    // If user is not in the top list (which is fixed above for demo), we would search or append.
+    // For this demo, we forced them at rank 4.
+
+    // Check if we actually have the user in the list
+    const userEntry = mockLeaderboard.find(e => e.address === userAddress);
+
+    // If we didn't force them (e.g. logic changed), ensure we return a userRank
+    const userRank = userEntry || {
+        rank: 42,
+        score: 0,
+        address: userAddress || "0x...",
+        name: "Anonymous",
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userAddress || 'anon'}`
+    };
 
     return NextResponse.json({
         leaderboard: mockLeaderboard,
-        userRank: {
-            rank: 4,
-            score: Math.floor(1250 * scoreMultiplier),
-            address: "0xYour...Wallet",
-            name: "you.base.eth",
-            avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=you"
-        }
+        userRank: userRank
     });
 }
