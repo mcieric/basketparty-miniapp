@@ -147,7 +147,7 @@ export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
                                                                     {entry.name || "YOU"}
                                                                 </span>
                                                                 <span className="text-xs text-muted-foreground font-mono truncate">
-                                                                    {entry.address}
+                                                                    {entry.address.slice(0, 6)}...{entry.address.slice(-4)}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -207,7 +207,7 @@ export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
                                                             {entry.name || "Anonymous"}
                                                         </span>
                                                         <span className="text-xs text-muted-foreground font-mono truncate">
-                                                            {entry.address}
+                                                            {entry.address.slice(0, 6)}...{entry.address.slice(-4)}
                                                         </span>
                                                     </div>
                                                 </div>
