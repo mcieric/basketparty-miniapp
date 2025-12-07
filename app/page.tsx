@@ -25,7 +25,7 @@ import {
 } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity } from '@coinbase/onchainkit/identity';
 import { Leaderboard } from "@/components/Leaderboard";
-import { WalletSelector } from "@/components/WalletSelector";
+
 
 export default function Home() {
   // const { isFrameReady, setFrameReady } = useMiniKit();
@@ -233,25 +233,21 @@ export default function Home() {
                   <div className="space-y-6 relative z-10">
                     {/* WALLET CONNECTION */}
                     <div className="flex flex-col items-center gap-4">
-                      <div className="w-full">
-                        {!user.address ? (
-                          <WalletSelector />
-                        ) : (
-                          <Wallet>
-                            <ConnectWallet className="w-full bg-slate-950/50 hover:bg-slate-900 border-white/5 text-white transition-all duration-300 group/wallet">
-                              <Avatar className="h-6 w-6 ring-2 ring-white/10" />
-                              <Name className="font-bold text-blue-100 group-hover/wallet:text-white transition-colors" />
-                            </ConnectWallet>
-                            <WalletDropdown>
-                              <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                                <Avatar />
-                                <Name />
-                                <Address />
-                              </Identity>
-                              <WalletDropdownDisconnect />
-                            </WalletDropdown>
-                          </Wallet>
-                        )}
+                      <div className="w-full text-center">
+                        <Wallet>
+                          <ConnectWallet className="mx-auto bg-slate-950/50 hover:bg-slate-900 border-white/5 text-white transition-all duration-300">
+                            <Avatar className="h-6 w-6 ring-2 ring-white/10" />
+                            <Name className="font-bold text-blue-100" />
+                          </ConnectWallet>
+                          <WalletDropdown>
+                            <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                              <Avatar />
+                              <Name />
+                              <Address />
+                            </Identity>
+                            <WalletDropdownDisconnect />
+                          </WalletDropdown>
+                        </Wallet>
                       </div>
                     </div>
 

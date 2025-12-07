@@ -1,30 +1,71 @@
 "use client";
 
 import { useAccount } from "wagmi";
-// import { useMiniKit } from "@coinbase/onchainkit/minikit"; 
-// Switching to manual SDK usage or just rely on Wallet for now to fix crash, 
-// then implement SDK properly.
-// Actually, I'll just use the wallet address for now to unblock.
+import sdk from "@farcaster/miniapp-sdk";
+import { useEffect, useState } from "react";
 
 export type BaseUserContext = {
   address: string | undefined;
   displayName: string | null;
   avatarUrl: string | null;
   isAuthenticated: boolean;
+  type: "farcaster" | "wallet" | null;
 };
 
 export function useBaseUserContext(): BaseUserContext {
   const { address, isConnected } = useAccount();
+  const [farcasterUser, setFarcasterUser] = useState<{
+    username?: string;
+    displayName?: string;
+    pfpUrl?: string;
+    custodyAddress?: string;
+    verifiedAddresses?: string[];
+  } | null>(null);
 
-  // TODO: Integrate sdk.quickAuth.getToken() and user data properly
-  // For now, fallback to wallet only to fix the crash
-  const displayName = address ? `${address.slice(0, 6)}...` : null;
-  const avatarUrl = null;
+  useEffect(() => {
+    async function checkFarcaster() {
+      try {
+        const context = await sdk.context;
+        if (context?.user) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const fcUser = context.user as any;
+          setFarcasterUser({
+            username: fcUser.username,
+            displayName: fcUser.displayName,
+            pfpUrl: fcUser.pfpUrl,
+            custodyAddress: fcUser.custodyAddress,
+            verifiedAddresses: fcUser.verifiedAddresses as string[],
+          });
+        }
+      } catch (e) {
+        console.warn("Farcaster SDK context skipped:", e);
+      }
+    }
+    checkFarcaster();
+  }, []); // Run once on mount
 
+  // Resolve Identity
+  // Priority: Farcaster > Connected Wallet
+
+  if (farcasterUser) {
+    // Prefer verified address, then custody address
+    const fcAddress = farcasterUser.verifiedAddresses?.[0] || farcasterUser.custodyAddress;
+
+    return {
+      address: fcAddress,
+      displayName: farcasterUser.displayName || farcasterUser.username || "Farcaster User",
+      avatarUrl: farcasterUser.pfpUrl || null,
+      isAuthenticated: !!fcAddress,
+      type: "farcaster"
+    };
+  }
+
+  // Fallback to Wagmi (Base App / Browser)
   return {
     address: address,
-    displayName,
-    avatarUrl,
-    isAuthenticated: isConnected && !!address
+    displayName: address ? `${address.slice(0, 6)}...` : null,
+    avatarUrl: null, // Wallet usually doesn't provide avatar immediately without ENS/Basename fetch
+    isAuthenticated: isConnected && !!address,
+    type: "wallet"
   };
 }
