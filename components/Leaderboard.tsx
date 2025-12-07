@@ -107,63 +107,119 @@ export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
                                     Loading scores...
                                 </div>
                             ) : (
-                                <div className="h-[60vh] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                                    {data.map((entry) => (
-                                        <div
-                                            key={entry.rank}
-                                            className={cn(
-                                                "flex items-center justify-between p-3 rounded-xl border transition-all",
-                                                entry.isUser
-                                                    ? "bg-blue-500/20 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]"
-                                                    : "bg-slate-900/50 border-white/5 hover:bg-slate-800/50"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className={cn(
-                                                    "w-8 h-8 flex items-center justify-center font-bold rounded-full text-sm shrink-0",
-                                                    entry.rank === 1 ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/50" :
-                                                        entry.rank === 2 ? "bg-slate-300 text-black shadow-lg shadow-slate-300/50" :
-                                                            entry.rank === 3 ? "bg-amber-700 text-white shadow-lg shadow-amber-700/50" :
-                                                                "bg-slate-800 text-slate-400"
-                                                )}>
-                                                    {entry.rank}
-                                                </div>
+                                <>
+                                    {/* USER S RANK (PINNED) */}
+                                    {data.find(e => e.isUser) && (
+                                        <div className="mb-4 pb-4 border-b border-white/10">
+                                            {(() => {
+                                                const entry = data.find(e => e.isUser)!;
+                                                return (
+                                                    <div
+                                                        className="flex items-center justify-between p-3 rounded-xl border transition-all bg-blue-500/20 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 flex items-center justify-center font-bold rounded-full text-sm shrink-0 bg-blue-500 text-white shadow-lg shadow-blue-500/50">
+                                                                {entry.rank}
+                                                            </div>
 
-                                                {/* AVATAR */}
-                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-white/10 shrink-0">
-                                                    {entry.avatar && (
-                                                        <Image
-                                                            src={entry.avatar}
-                                                            alt="Avatar"
-                                                            fill
-                                                            className="object-cover"
-                                                        />
-                                                    )}
-                                                </div>
+                                                            {/* AVATAR */}
+                                                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-white/10 shrink-0">
+                                                                {entry.avatar ? (
+                                                                    <Image
+                                                                        src={entry.avatar}
+                                                                        alt={entry.name || "Avatar"}
+                                                                        fill
+                                                                        className="object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center bg-slate-700 text-xs font-bold text-slate-400">
+                                                                        {entry.name?.[0] || "?"}
+                                                                    </div>
+                                                                )}
+                                                            </div>
 
-                                                <div className="flex flex-col overflow-hidden">
-                                                    <span className={cn(
-                                                        "font-bold text-sm truncate",
-                                                        entry.isUser ? "text-blue-300" : "text-slate-200"
-                                                    )}>
-                                                        {entry.name || "Anonymous"}
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground font-mono truncate">
-                                                        {entry.address}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="font-black text-xl tracking-tight text-white/90 whitespace-nowrap ml-2">
-                                                {entry.score.toLocaleString()}
-                                            </div>
+                                                            <div className="flex flex-col overflow-hidden">
+                                                                <span className="font-bold text-sm truncate text-blue-300">
+                                                                    {entry.name || "YOU"}
+                                                                </span>
+                                                                <span className="text-xs text-muted-foreground font-mono truncate">
+                                                                    {entry.address}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="font-black text-xl tracking-tight text-white/90 whitespace-nowrap ml-2">
+                                                            {entry.score.toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
-                                    ))}
-                                </div>
+                                    )}
+
+
+                                    <div className="h-[50vh] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                                        {data.map((entry) => (
+                                            <div
+                                                key={entry.rank}
+                                                className={cn(
+                                                    "flex items-center justify-between p-3 rounded-xl border transition-all",
+                                                    entry.isUser
+                                                        ? "bg-blue-500/10 border-blue-500/30 opacity-50" // Dim user in list since pinned
+                                                        : "bg-slate-900/50 border-white/5 hover:bg-slate-800/50"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "w-8 h-8 flex items-center justify-center font-bold rounded-full text-sm shrink-0",
+                                                        entry.rank === 1 ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/50" :
+                                                            entry.rank === 2 ? "bg-slate-300 text-black shadow-lg shadow-slate-300/50" :
+                                                                entry.rank === 3 ? "bg-amber-700 text-white shadow-lg shadow-amber-700/50" :
+                                                                    "bg-slate-800 text-slate-400"
+                                                    )}>
+                                                        {entry.rank}
+                                                    </div>
+
+                                                    {/* AVATAR */}
+                                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-white/10 shrink-0">
+                                                        {entry.avatar ? (
+                                                            <Image
+                                                                src={entry.avatar}
+                                                                alt={entry.name || "Avatar"}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-slate-700 text-xs font-bold text-slate-400">
+                                                                {entry.name?.[0] || "?"}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex flex-col overflow-hidden">
+                                                        <span className={cn(
+                                                            "font-bold text-sm truncate",
+                                                            entry.isUser ? "text-blue-300" : "text-slate-200"
+                                                        )}>
+                                                            {entry.name || "Anonymous"}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground font-mono truncate">
+                                                            {entry.address}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="font-black text-xl tracking-tight text-white/90 whitespace-nowrap ml-2">
+                                                    {entry.score.toLocaleString()}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
                             )}
                         </div>
                     </motion.div>
                 </>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 }
