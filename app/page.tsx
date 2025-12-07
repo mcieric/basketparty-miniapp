@@ -116,6 +116,8 @@ export default function Home() {
           method: "POST",
           body: JSON.stringify({
             address: user.address,
+            name: user.displayName,
+            avatar: user.avatarUrl,
             score,
             game_id: sessionData.gameId
           }),

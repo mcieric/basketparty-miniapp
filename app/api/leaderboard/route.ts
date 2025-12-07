@@ -1,46 +1,87 @@
+import { kv } from "@vercel/kv";
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const period = searchParams.get('period') || 'alltime'; // 'daily' or 'alltime'
+    const period = searchParams.get('period') || 'alltime';
+    const isDaily = period === 'daily'; // We might only support 'alltime' initially
+
+    // For now, map 'daily' to 'alltime' or implement daily keys if needed later.
+    // Let's stick to one 'leaderboard:alltime' for simplicity as requested, 
+    // or use 'leaderboard:daily' if we set expiry. keeping it simple: 'leaderboard:alltime'.
 
     const userAddress = searchParams.get('user');
 
-    // Generate some mock data
-    const isDaily = period === 'daily';
-    const seed = isDaily ? 'daily_seed' : 'alltime_seed';
-    const scoreMultiplier = isDaily ? 0.3 : 1; // Daily scores are lower
+    try {
+        const LEADERBOARD_KEY = 'leaderboard:alltime';
 
-    const mockLeaderboard = Array.from({ length: 10 }).map((_, i) => {
-        // Deterministic mock addresses based on index
-        const mockAddr = `0x${(i + 10).toString(16).repeat(10)}`;
-        return {
-            rank: i + 1,
-            address: i === 3 && userAddress ? userAddress : mockAddr, // Force 4th place to be user for demo if userAddress exists
-            name: i === 3 && userAddress ? 'YOU' : i === 0 ? 'king.base.eth' : `player${i}.base.eth`,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i === 3 && userAddress ? userAddress : seed + i}`, // Reliable avatar API
-            score: Math.floor((500 - i * 40) * scoreMultiplier), // Descending scores
-            isUser: (i === 3 && !!userAddress) // Mark as user if it matches
-        };
-    });
+        // Fetch Top 50
+        // zrange returns array of { member, score } if validated, or flat array.
+        // Vercel KV (upstash) returns [{ member, score }, ...] with withScores: true
+        const topEntries = await kv.zrange(LEADERBOARD_KEY, 0, 49, { rev: true, withScores: true });
 
-    // If user is not in the top list (which is fixed above for demo), we would search or append.
-    // For this demo, we forced them at rank 4.
+        // Hydrate with metadata
+        const leaderboard = await Promise.all(topEntries.map(async (entry: any, index: number) => {
+            // Entry structure depends on library version/adapter. 
+            // If using @vercel/kv directly, it returns objects { member: string, score: number }
+            const address = entry.member as string;
+            const score = entry.score;
 
-    // Check if we actually have the user in the list
-    const userEntry = mockLeaderboard.find(e => e.address === userAddress);
+            // Fetch user metadata
+            const metadata: any = await kv.hgetall(`user:${address}`);
 
-    // If we didn't force them (e.g. logic changed), ensure we return a userRank
-    const userRank = userEntry || {
-        rank: 42,
-        score: 0,
-        address: userAddress || "0x...",
-        name: "Anonymous",
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userAddress || 'anon'}`
-    };
+            return {
+                rank: index + 1,
+                address: address,
+                name: metadata?.name || undefined,
+                avatar: metadata?.avatar || undefined,
+                score: score,
+                isUser: userAddress ? (address.toLowerCase() === userAddress.toLowerCase()) : false
+            };
+        }));
 
-    return NextResponse.json({
-        leaderboard: mockLeaderboard,
-        userRank: userRank
-    });
+        // Get Current User Rank
+        let userRank = null;
+        if (userAddress) {
+            // check if user is in the fetched list first
+            const inList = leaderboard.find(e => e.isUser);
+            if (inList) {
+                userRank = inList;
+            } else {
+                // Fetch independently
+                const rank = await kv.zrevrank(LEADERBOARD_KEY, userAddress);
+                const score = await kv.zscore(LEADERBOARD_KEY, userAddress);
+
+                if (rank !== null && score !== null) {
+                    const metadata: any = await kv.hgetall(`user:${userAddress}`);
+                    userRank = {
+                        rank: rank + 1,
+                        score: score,
+                        address: userAddress,
+                        name: metadata?.name || "YOU",
+                        avatar: metadata?.avatar || undefined
+                    };
+                } else {
+                    // User has no score yet
+                    userRank = {
+                        rank: null,
+                        score: 0,
+                        address: userAddress,
+                        name: "YOU",
+                        avatar: undefined
+                    }
+                }
+            }
+        }
+
+        return NextResponse.json({
+            leaderboard,
+            userRank
+        });
+
+    } catch (error) {
+        console.error("Leaderboard fetch failed:", error);
+        // Fallback to empty or error
+        return NextResponse.json({ leaderboard: [], userRank: null });
+    }
 }
