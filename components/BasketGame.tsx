@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Trophy, Flame, Target } from "lucide-react";
+
 
 const GAME_WIDTH = 350;
 const GAME_HEIGHT = 600;
@@ -36,7 +36,7 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
         }
 
         setBasketX((prev) => {
-            let next = prev + basketSpeed.current * basketDirection.current;
+            const next = prev + basketSpeed.current * basketDirection.current;
             // Bounds
             if (next > GAME_WIDTH - 60 || next < 60) {
                 basketDirection.current *= -1;

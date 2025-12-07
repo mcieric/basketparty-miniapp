@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import sdk from "@farcaster/miniapp-sdk";
 import { useBaseUserContext } from "./hooks/useBaseUserContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BasketGame } from "@/components/BasketGame";
 import { Loader2, Trophy, Coins } from "lucide-react";
@@ -28,7 +28,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 
 export default function Home() {
   // const { isFrameReady, setFrameReady } = useMiniKit();
-  const [isFrameReady, setFrameReady] = useState(false);
+  const [, setFrameReady] = useState(false);
   const user = useBaseUserContext();
   const [gameState, setGameState] = useState<"menu" | "loading" | "playing" | "payment" | "gameover">("menu");
   const [sessionData, setSessionData] = useState<{ gameId?: string, error?: string } | null>(null);
@@ -318,7 +318,7 @@ export default function Home() {
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black text-white">QUOTA GRATUIT ÉPUISÉ</h2>
                   <p className="text-slate-400 text-sm">
-                    Vous avez déjà joué votre partie gratuite aujourd'hui.
+                    Vous avez déjà joué votre partie gratuite aujourd&apos;hui.
                   </p>
                 </div>
 
