@@ -1,4 +1,5 @@
 import { Trophy, X } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -131,7 +132,12 @@ export function Leaderboard({ open, onOpenChange }: LeaderboardProps) {
                                                 {/* AVATAR */}
                                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-white/10 shrink-0">
                                                     {entry.avatar && (
-                                                        <img src={entry.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                                                        <Image
+                                                            src={entry.avatar}
+                                                            alt="Avatar"
+                                                            fill
+                                                            className="object-cover"
+                                                        />
                                                     )}
                                                 </div>
 
