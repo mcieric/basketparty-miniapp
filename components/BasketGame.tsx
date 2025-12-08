@@ -78,6 +78,8 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
         const diff = Math.abs(basketX - (GAME_WIDTH / 2));
         // Logic: < 45 is a hit (Swish). 45-65 is a rim hit (Brick). > 65 is an airball.
 
+        let points = 0;
+
         // Animate
         const duration = 0.5;
 
@@ -89,7 +91,7 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
 
         if (diff < 45) {
             // GOAL
-            const points = 10 + (combo * 2);
+            points = 10 + (combo * 2);
             setScore(s => s + points);
             setCombo(c => c + 1);
             showFeedback(combo > 1 ? `COMBO x${combo}!` : "SWISH!", "text-green-400");
