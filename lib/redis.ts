@@ -8,7 +8,7 @@ class MockRedis {
 
     // private expirations = new Map<string, number>();
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     async get(key: string) {
         console.log(`[MockRedis] GET ${key}`);
         return null; // Simple KV not used for leaderboard
@@ -72,7 +72,7 @@ class MockRedis {
         return 1;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     async hgetall(_key: string) {
         return {}; // Return empty metadata
     }
