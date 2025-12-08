@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, useAnimation, AnimatePresence } from "framer-motion";
+import { motion, useAnimation, AnimatePresence, Variants } from "framer-motion";
 import confetti from "canvas-confetti";
 
 
@@ -26,6 +26,8 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
 
     // Controls
     const ballControls = useAnimation();
+    const netControls = useAnimation();
+    const containerControls = useAnimation();
 
     // Loop
     const animateBasket = useCallback(() => {
@@ -93,18 +95,30 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
             showFeedback(combo > 1 ? `COMBO x${combo}!` : "SWISH!", "text-green-400");
             setBallState("scored");
 
+            // Screen Shake on combo
+            if (combo > 0) {
+                containerControls.start({
+                    x: [0, -5, 5, -5, 5, 0],
+                    transition: { duration: 0.2 }
+                });
+            }
+
             confetti({
-                particleCount: 30 * (Math.min(combo, 5)),
+                particleCount: 30 * (Math.min(combo + 1, 5)),
                 spread: 50,
                 origin: { y: 0.3 },
                 colors: ['#34D399', '#FBBF24']
             });
 
-            // Net ripple effect
+            // Net ripple effect (Animation Variant Trigger)
+            netControls.start("swish");
+
+            // Ball drops through net
             await ballControls.start({
-                y: BASKET_Y + 80,
+                y: BASKET_Y + 120,
                 opacity: 0,
-                transition: { duration: 0.2 }
+                scale: 0.4,
+                transition: { duration: 0.25, ease: "easeIn" }
             });
 
         } else if (diff < 65) {
@@ -114,15 +128,23 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
             showFeedback("BRICK", "text-orange-500");
 
             // Bounce off rim
+            const bounceDirection = (basketX > GAME_WIDTH / 2 ? -1 : 1);
+
+            // Screen Shake (small)
+            containerControls.start({
+                x: [0, -2, 2, 0],
+                transition: { duration: 0.1 }
+            });
+
             await ballControls.start({
-                x: (basketX > GAME_WIDTH / 2 ? -1 : 1) * 80 + (Math.random() * 40 - 20), // Bounce away from rim center
+                x: bounceDirection * 80 + (Math.random() * 40 - 20),
                 y: BASKET_Y - 50, // Slight pop up
-                rotate: 45,
+                rotate: 45 * bounceDirection,
                 transition: { duration: 0.1, ease: "easeOut" }
             });
             await ballControls.start({
                 y: GAME_HEIGHT + 100,
-                rotate: 200,
+                rotate: 200 * bounceDirection,
                 transition: { duration: 0.4, ease: "easeIn" }
             });
 
@@ -149,16 +171,37 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
             }, 500);
         } else {
             // Game Over
-            setTimeout(() => onGameOver(score + (diff < 45 ? 10 : 0)), 500);
+            setTimeout(() => onGameOver(score + (diff < 45 ? points : 0)), 500);
+        }
+    };
+
+    const netVariants: Variants = {
+        idle: { scaleY: 1, skewX: 0 },
+        swish: {
+            scaleY: [1, 1.3, 0.9, 1],
+            skewX: [0, -5, 5, 0],
+            originY: 0,
+            transition: { duration: 0.4, ease: "easeOut" }
         }
     };
 
     return (
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-950 font-sans select-none"
-            style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
+        <motion.div
+            animate={containerControls}
+            className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-950 font-sans select-none"
+            style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}
+        >
 
             {/* AMBIENCE BACKGROUND */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/40 via-slate-950 to-slate-950" />
+
+            {/* Animated Particles/Stars (Simplified) */}
+            <div className="absolute inset-0 opacity-30">
+                <div className="absolute w-1 h-1 bg-white rounded-full top-10 left-20 animate-pulse" />
+                <div className="absolute w-1 h-1 bg-white rounded-full top-40 right-10 animate-pulse delay-75" />
+                <div className="absolute w-1 h-1 bg-white rounded-full bottom-20 left-10 animate-pulse delay-150" />
+            </div>
+
 
             {/* PERSPECTIVE GRID FLOOR */}
             <div className="absolute bottom-0 w-full h-1/2 opacity-20"
@@ -170,16 +213,26 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
 
             {/* UI HEADER */}
             <div className="absolute top-0 w-full p-4 flex justify-between items-start z-30 bg-gradient-to-b from-black/80 to-transparent">
-                <div className="bg-slate-800/80 backdrop-blur border border-white/10 px-4 py-2 rounded-xl flex flex-col items-center">
+                <motion.div
+                    key={score}
+                    initial={{ scale: 1 }}
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.1 }}
+                    className="bg-slate-800/80 backdrop-blur border border-white/10 px-4 py-2 rounded-xl flex flex-col items-center"
+                >
                     <span className="text-xs text-muted-foreground uppercase tracking-wider">Score</span>
                     <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 font-mono">
                         {score}
                     </span>
-                </div>
+                </motion.div>
 
                 <div className="flex gap-1">
-                    {Array.from({ length: Math.max(ballsLeft, 0) }).map((_, i) => (
-                        <div key={i} className="w-4 h-4 rounded-full bg-orange-500 border border-orange-300 shadow shadow-orange-500/50" />
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        // Show filled for remaining, empty/ghost for used
+                        <div key={i} className={`w-4 h-4 rounded-full border transition-all duration-300 ${i < ballsLeft
+                            ? "bg-orange-500 border-orange-300 shadow shadow-orange-500/50 scale-100"
+                            : "bg-slate-800 border-slate-700 scale-75 opacity-50"
+                            }`} />
                     ))}
                 </div>
             </div>
@@ -189,9 +242,9 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
                 {feedback && (
                     <motion.div
                         key={feedback.text}
-                        initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, y: -50, scale: 1.2 }}
-                        exit={{ opacity: 0 }}
+                        initial={{ opacity: 0, y: 0, scale: 0.5, rotate: -10 }}
+                        animate={{ opacity: 1, y: -50, scale: 1.5, rotate: 0 }}
+                        exit={{ opacity: 0, scale: 2 }}
                         className={`absolute top-1/2 left-0 right-0 text-center z-40 font-black text-4xl ${feedback.color} drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]`}
                         style={{ textShadow: '0 0 20px currentColor' }}
                     >
@@ -219,8 +272,12 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
                     {/* Front Rim */}
                     <div className="w-20 h-3 bg-gradient-to-r from-orange-600 via-orange-400 to-orange-600 rounded-full z-20 shadow-lg" />
 
-                    {/* Net */}
-                    <div className="w-16 h-12 relative z-10 opacity-80"
+                    {/* Net (Animated) */}
+                    <motion.div
+                        variants={netVariants}
+                        initial="idle"
+                        animate={netControls}
+                        className="w-16 h-12 relative z-10 opacity-80 origin-top"
                         style={{
                             background: 'repeating-linear-gradient(45deg, transparent, transparent 4px, #eee 4px, #eee 5px), repeating-linear-gradient(-45deg, transparent, transparent 4px, #eee 4px, #eee 5px)',
                             maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
@@ -266,6 +323,6 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
                     <div className="absolute top-2 left-2 w-8 h-4 bg-white/30 blur-md rounded-full -rotate-45" />
                 </div>
             </motion.div>
-        </div>
+        </motion.div>
     );
 }
