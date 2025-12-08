@@ -3,12 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    // const period = searchParams.get('period') || 'alltime'; 
+    const period = searchParams.get('period') || 'alltime';
 
     const userAddress = searchParams.get('user');
 
     try {
-        const LEADERBOARD_KEY = 'leaderboard:alltime';
+        let LEADERBOARD_KEY = 'leaderboard:alltime';
+
+        if (period === 'daily') {
+            const today = new Date().toISOString().split('T')[0];
+            LEADERBOARD_KEY = `leaderboard:daily:${today}`;
+        }
 
         // Fetch Top 50
         // ioredis zrange with WITHSCORES returns ['member1', 100, 'member2', 90, ...]

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { encodeFunctionData, parseAbi } from 'viem';
 // import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import sdk from "@farcaster/miniapp-sdk";
 import { useBaseUserContext } from "./hooks/useBaseUserContext";
@@ -138,6 +139,17 @@ export default function Home() {
       setGameState("gameover");
     }
   };
+
+  // USDC Config
+  const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+  const RECIPIENT_ADDRESS = "0x6076a0d96084776526332766148Cc74e6Fae9c5b";
+  const TRANSFER_AMOUNT = BigInt(100000); // 0.1 USDC
+
+  const encodedTransferData = encodeFunctionData({
+    abi: parseAbi(["function transfer(address to, uint256 value) returns (bool)"]),
+    functionName: "transfer",
+    args: [RECIPIENT_ADDRESS, TRANSFER_AMOUNT]
+  });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center relative overflow-x-hidden bg-slate-950 font-sans selection:bg-blue-500/30">
@@ -353,20 +365,11 @@ export default function Home() {
                 <div className="space-y-3 pt-2">
                   <Transaction
                     chainId={8453}
-                    calls={[
-                      {
-                        to: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Base USDC
-                        functionName: "transfer",
-                        args: ["0x6076a0d96084776526332766148Cc74e6Fae9c5b", BigInt(100000)], // 0.1 USDC (6 decimals)
-                        abi: [{
-                          type: "function",
-                          name: "transfer",
-                          inputs: [{ name: "to", type: "address" }, { name: "value", type: "uint256" }],
-                          outputs: [{ name: "", type: "bool" }],
-                          stateMutability: "nonpayable"
-                        }]
-                      }
-                    ]}
+                    calls={[{
+                      to: USDC_ADDRESS,
+                      data: encodedTransferData,
+                      value: BigInt(0)
+                    }]}
                     onStatus={(status) => {
                       console.log("Tx Status:", status);
                       if (status.statusName === 'success') {

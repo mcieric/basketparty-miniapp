@@ -19,7 +19,13 @@ export async function POST(req: NextRequest) {
         // CUMULATIVE Logic: Add score to existing total (zincrby)
         await redis.zincrby('leaderboard:alltime', score, address);
 
-        // Get new total for response
+        // Save to Daily Leaderboard
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const dailyKey = `leaderboard:daily:${today}`;
+        await redis.zincrby(dailyKey, score, address);
+        await redis.expire(dailyKey, 60 * 60 * 24 * 7); // Keep daily data for 7 days
+
+        // Get new total for response (from all-time)
         const newTotalStr = await redis.zscore('leaderboard:alltime', address);
         const newTotal = newTotalStr ? parseInt(newTotalStr, 10) : score;
 
