@@ -1,25 +1,20 @@
 import Redis from 'ioredis';
 
-const getRedisUrl = () => {
-    if (process.env.REDIS_URL) {
-        return process.env.REDIS_URL;
-    }
 
-    // Fallback for build time or local dev without env vars
-    console.warn("WARN: REDIS_URL not defined. Using dummy connection.");
-    return "redis://localhost:6379";
-};
 
 // Mock Redis for local development if no URL is provided
 class MockRedis {
     private store = new Map<string, Map<string, number>>(); // key -> (member -> score)
-    private expirations = new Map<string, number>();
 
+    // private expirations = new Map<string, number>();
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async get(key: string) {
         console.log(`[MockRedis] GET ${key}`);
         return null; // Simple KV not used for leaderboard
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async set(key: string, value: string, ...args: any[]) {
         console.log(`[MockRedis] SET ${key} ${value}`, args);
         return 'OK';
@@ -71,12 +66,14 @@ class MockRedis {
         return 1;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async hset(key: string, data: any) {
         console.log(`[MockRedis] HSET ${key}`, data);
         return 1;
     }
 
-    async hgetall(key: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async hgetall(_key: string) {
         return {}; // Return empty metadata
     }
 }
