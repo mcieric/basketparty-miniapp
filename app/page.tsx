@@ -24,6 +24,7 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from '@coinbase/onchainkit/wallet';
+import { useSignMessage } from 'wagmi';
 import { Address, Avatar, Name, Identity } from '@coinbase/onchainkit/identity';
 import { Leaderboard } from "@/components/Leaderboard";
 
@@ -106,6 +107,8 @@ export default function Home() {
     }
   };
 
+  const { signMessageAsync } = useSignMessage();
+
   // 3. Handle End Game
   const handleGameOver = async (score: number) => {
     setLastScore(score);
@@ -113,6 +116,17 @@ export default function Home() {
       // Optimistic update
       setGameState("gameover");
       try {
+        // Sign the score
+        const message = `GameId:${sessionData.gameId}:Score:${score}`;
+        let signature;
+        try {
+          signature = await signMessageAsync({ message });
+        } catch (sigError) {
+          console.error("User refused to sign or error:", sigError);
+          alert("Score submission failed: Signature required.");
+          return;
+        }
+
         const res = await fetch("/api/game/end", {
           method: "POST",
           body: JSON.stringify({
@@ -120,7 +134,8 @@ export default function Home() {
             name: user.displayName,
             avatar: user.avatarUrl,
             score,
-            game_id: sessionData.gameId
+            game_id: sessionData.gameId,
+            signature
           }),
         });
 
