@@ -38,12 +38,23 @@ export function BasketGame({ onGameOver }: { onGameOver: (score: number) => void
         }
 
         setBasketX((prev) => {
-            const next = prev + basketSpeed.current * basketDirection.current;
+            let next = prev + basketSpeed.current * basketDirection.current;
             // Bounds
-            if (next > GAME_WIDTH - 60 || next < 60) {
-                basketDirection.current *= -1;
-                // Randomize speed on wall hit: 0.8x to 2.3x of base speed
-                basketSpeed.current = baseSpeed.current * (0.8 + Math.random() * 1.5);
+            // Bounds
+            if (next > GAME_WIDTH - 60) {
+                if (basketDirection.current > 0) {
+                    basketDirection.current *= -1;
+                    // Randomize speed on wall hit: 0.8x to 2.3x of base speed
+                    basketSpeed.current = baseSpeed.current * (0.8 + Math.random() * 1.5);
+                }
+                next = GAME_WIDTH - 60;
+            } else if (next < 60) {
+                if (basketDirection.current < 0) {
+                    basketDirection.current *= -1;
+                    // Randomize speed on wall hit: 0.8x to 2.3x of base speed
+                    basketSpeed.current = baseSpeed.current * (0.8 + Math.random() * 1.5);
+                }
+                next = 60;
             }
             return next;
         });
